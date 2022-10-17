@@ -86,8 +86,9 @@ export async function openUrl(req, res){
             return res.sendStatus(404);
         }
 
-        const originalUrl = urlExists.rows[0].url;
+        await connection.query('UPDATE urls SET "visitCount"="visitCount"+1 WHERE "shortUrl"=$1',[shortUrl]);
 
+        const originalUrl = urlExists.rows[0].url;
         return res.redirect(originalUrl);
 
     } catch(error){

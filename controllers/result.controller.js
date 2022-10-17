@@ -56,3 +56,23 @@ export async function getUserUrls(req, res){
         return res.sendStatus(500);
     } 
 }
+
+export async function getRanking(req, res){
+
+    try{
+
+        const ranking = await connection.query(`
+            SELECT users.id, users.name, COUNT(*) as "linksCount", SUM(urls."visitCount") as "visitCount" FROM urls LEFT JOIN users ON urls."userId" = users.id GROUP BY users.id ORDER BY "visitCount" DESC LIMIT 10
+        `)
+
+
+        return res
+            .send(ranking.rows)
+            .status(200)
+
+    } catch(error){
+        console.log(error);
+        return res.sendStatus(500);
+    } 
+
+}

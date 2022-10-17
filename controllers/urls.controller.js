@@ -37,7 +37,6 @@ export async function urlsShorten(req, res){
 
         await connection.query('INSERT INTO urls ("userId",url,"shortUrl","createdAt") VALUES ($1,$2,$3,$4)', [userId, url, shortUrl, dayjs()]);
 
-
         return res
             .status(200)
             .send(shortUrl);
@@ -52,6 +51,30 @@ export async function urlsShorten(req, res){
 
 
 
+
+}
+
+export async function getUrl(req, res){
+    const { id } = req.params;
+
+    try{
+        const urlExists = await connection.query('SELECT * FROM urls WHERE id=$1', [id]);
+        if(!(urlExists.rows.length)){
+            return res.sendStatus(404);
+        }
+
+        return res.send({
+            id: urlExists.rows[0].id,
+            shortUrl: urlExists.rows[0].shortUrl,
+            url: urlExists.rows[0].url
+        });
+        
+        
+    }
+    catch(error){
+        console.log(error);
+        return res.sendStatus(500);
+    } 
 
 }
 

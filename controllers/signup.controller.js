@@ -58,7 +58,9 @@ export async function signIn(req, res){
         }
 
         const token = uuid();
-        
+        const userId = userExists.rows[0].id;
+        await connection.query('INSERT INTO sessions ("userId",token,"createdAt") VALUES ($1,$2,$3)', [userId, token, dayjs()]);
+
         return res 
             .status(200)
             .send({token: token})

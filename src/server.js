@@ -3,15 +3,18 @@ import cors from "cors";
 import dotenv from "dotenv";
 import dayjs from "dayjs";
 import signUpRouter from "../routes/signup.router.js";
+import urlsRouter from "../routes/urls.router.js";
 
 dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.use(signUpRouter)
+app.use(signUpRouter);
+app.use(urlsRouter);
 
 app.get('/status', (req, res) =>{
+    res.send(req.headers.authorization.replace('Bearer ',''));
     res.sendStatus(200);
 });
 

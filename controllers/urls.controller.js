@@ -26,11 +26,12 @@ export async function urlsShorten(req, res){
             return res.sendStatus(422);
         }
 
-        const sessionExists = await connection.query('SELECT * FROM sessions WHERE token=$1',[token]);
-    
+        const sessionExists = await connection.query(`SELECT * FROM sessions WHERE token=${token}`);
+
         if(!(sessionExists.rows.length)){
             return res.sendStatus(401);
         }
+
 
         const userId = sessionExists.rows[0].userId;
         const shortUrl = nanoid()
@@ -94,6 +95,56 @@ export async function openUrl(req, res){
         return res.sendStatus(500);
     } 
 }
+
+export async function deleteUrl(req, res){
+
+    const { id } = req.params;
+    let token = req.headers.authorization;
+    
+    try{
+
+        
+        if(!token){
+            return res.sendStatus(401);
+        }
+
+        token = token.replace('Bearer ','');
+
+        const userExists = await connection.query(`SELECT * FROM sessions WHERE token=${token}`);
+
+        if(!(userExists.rows.length)){
+            return res.sendStatus(401);
+        }
+
+        const urlExists = await connection.query('SELECT * FROM urls WHERE id=$1',[id]);
+
+        if(!(urlExists.rows.length)){
+            return res.sendStatus(404);
+        }
+
+        const userIdSession = userExists.rows[0].userId;
+        const userIdUrl = urlExists.rows[0].userId;
+
+        if(userIdSession !== userIdUrl){
+            return res.sendStatus(401);
+        }
+
+        await connection.query('DELETE FROM urls WHERE id=$1',[id]);
+        res.sendStatus(204);
+
+        
+
+
+
+
+    }catch(error){
+        console.log(error);
+        return res.sendStatus(500);
+    } 
+
+
+}
+
 
 function validURL(str) {
     var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol

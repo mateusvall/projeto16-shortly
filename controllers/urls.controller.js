@@ -35,7 +35,7 @@ export async function urlsShorten(req, res){
         const userId = sessionExists.rows[0].userId;
         const shortUrl = nanoid()
 
-        await connection.query('INSERT INTO urls ("userId",url,"shortUrl","createdAt") VALUES ($1,$2,$3,$4)', [userId, url, shortUrl, dayjs()]);
+        await connection.query('INSERT INTO urls ("userId",url,"shortUrl","createdAt","visitCount") VALUES ($1,$2,$3,$4,$5)', [userId, url, shortUrl, dayjs(),0]);
 
         return res
             .status(200)
@@ -47,9 +47,6 @@ export async function urlsShorten(req, res){
         console.log(error);
         return res.sendStatus(500);
     } 
-    
-
-
 
 
 }
@@ -76,6 +73,26 @@ export async function getUrl(req, res){
         return res.sendStatus(500);
     } 
 
+}
+
+export async function openUrl(req, res){
+    const { shortUrl } = req.params;
+
+    try{
+
+        const urlExists = await connection.query('SELECT * FROM urls WHERE "shortUrl"=$1',[shortUrl]);
+        if(!(urlExists.rows.length)){
+            return res.sendStatus(404);
+        }
+
+        const originalUrl = urlExists.rows[0].url;
+
+        return res.redirect(originalUrl);
+
+    } catch(error){
+        console.log(error);
+        return res.sendStatus(500);
+    } 
 }
 
 function validURL(str) {
